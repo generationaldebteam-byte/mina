@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum ClientStatus {
+  NEW_CLIENT
+  GATHERING_DOCUMENTS
+  SUBMITTED
+  INTERVIEW_SCHEDULED
+  WAITING_DECISION
+  APPEAL
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum TaskType {
+  INTERVIEW
+  DOCUMENT_DEADLINE
+  APPOINTMENT
+  APPEAL
+  FOLLOW_UP
+  COURT_DATE
+  OTHER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  MISSED
+}
+
+enum InteractionType {
+  PHONE_CALL
+  WHATSAPP
+  EMAIL
+  OFFICE_VISIT
+  DOCUMENT_RECEIVED
+  FOLLOW_UP
+  OTHER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  caseUpdates  CaseUpdate[]
+  documents    Document[]
+  tasks        Task[]
+  interactions ClientInteraction[]
+}
+
+model Client {
+  id             String       @id @default(uuid())
+  fullName       String
+  phone          String
+  email          String?
+  nationality    String?
+  dateOfBirth    DateTime?
+  passportNumber String?
+  caseNumber     String       @unique
+  status         ClientStatus @default(NEW_CLIENT)
+  caseType       String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  caseUpdates    CaseUpdate[]
+  documents      Document[]
+  tasks          Task[]
+  checklist      ClientChecklistItem[]
+  interactions   ClientInteraction[]
+}
+
+model CaseUpdate {
+  id        String   @id @default(uuid())
+  clientId  String
+  note      String
+  createdById String
+  createdAt DateTime @default(now())
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdBy User     @relation(fields: [createdById], references: [id])
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  clientId  String
+  fileName  String
+  fileUrl   String
+  uploadedById String
+  createdAt DateTime @default(now())
+
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  uploadedBy User     @relation(fields: [uploadedById], references: [id])
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  clientId    String
+  title       String
+  description String?
+  dueDate     DateTime
+  type        TaskType     @default(OTHER)
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus   @default(PENDING)
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdBy User     @relation(fields: [createdById], references: [id])
+}
+
+model ClientChecklistItem {
+  id        String   @id @default(uuid())
+  clientId  String
+  title     String
+  completed Boolean  @default(false)
+  required  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model ClientInteraction {
+  id        String          @id @default(uuid())
+  clientId  String
+  type      InteractionType @default(OTHER)
+  note      String
+  createdById String
+  createdAt DateTime        @default(now())
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdBy User     @relation(fields: [createdById], references: [id])
+}
