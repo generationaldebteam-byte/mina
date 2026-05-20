@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function RootPage() {
-  return <h1>Hello</h1>;
+  redirect("/dashboard");
 }
