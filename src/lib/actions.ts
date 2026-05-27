@@ -341,69 +341,77 @@ const ALLOWED_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/jpg"
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function uploadDocument(clientId: string, formData: FormData) {
-  const session = await getSession();
+  try {
+    const session = await getSession();
 
-  const file = formData.get("file") as File;
-  if (!file || file.size === 0) {
-    return { error: "يرجى اختيار ملف" };
-  }
+    const file = formData.get("file") as File;
+    if (!file || file.size === 0) {
+      return { error: "يرجى اختيار ملف" };
+    }
 
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return { error: "فقط ملفات PDF و PNG و JPG مسموح بها" };
-  }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return { error: "فقط ملفات PDF و PNG و JPG مسموح بها" };
+    }
 
-  if (file.size > MAX_FILE_SIZE) {
-    return { error: "حجم الملف يجب أن لا يتجاوز 10 ميجابايت" };
-  }
+    if (file.size > MAX_FILE_SIZE) {
+      return { error: "حجم الملف يجب أن لا يتجاوز 10 ميجابايت" };
+    }
 
-  const ext = file.name.split(".").pop() || "bin";
-  const uniqueName = `${crypto.randomUUID()}.${ext}`;
+    const ext = file.name.split(".").pop() || "bin";
+    const uniqueName = `${crypto.randomUUID()}.${ext}`;
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const { error: uploadError } = await getSupabaseAdmin().storage
-    .from("documents")
-    .upload(uniqueName, buffer, {
-      contentType: file.type,
-      upsert: false,
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const { error: uploadError } = await getSupabaseAdmin().storage
+      .from("documents")
+      .upload(uniqueName, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return { error: `فشل رفع الملف: ${uploadError.message}` };
+    }
+
+    const { data: { publicUrl } } = getSupabaseAdmin().storage
+      .from("documents")
+      .getPublicUrl(uniqueName);
+
+    await prisma.document.create({
+      data: {
+        clientId,
+        fileName: file.name,
+        fileUrl: publicUrl,
+        uploadedById: (session.user as any).id,
+      },
     });
 
-  if (uploadError) {
-    return { error: "فشل رفع الملف إلى التخزين" };
+    revalidatePath(`/clients/${clientId}`);
+    return { success: true };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "خطأ غير متوقع" };
   }
-
-  const { data: { publicUrl } } = getSupabaseAdmin().storage
-    .from("documents")
-    .getPublicUrl(uniqueName);
-
-  await prisma.document.create({
-    data: {
-      clientId,
-      fileName: file.name,
-      fileUrl: publicUrl,
-      uploadedById: (session.user as any).id,
-    },
-  });
-
-  revalidatePath(`/clients/${clientId}`);
-  return { success: true };
 }
 
 export async function deleteDocument(docId: string) {
-  const session = await getSession();
-  if ((session.user as any).role !== "ADMIN") {
-    return { error: "هذه العملية متاحة للمسؤول فقط" };
+  try {
+    const session = await getSession();
+    if ((session.user as any).role !== "ADMIN") {
+      return { error: "هذه العملية متاحة للمسؤول فقط" };
+    }
+
+    const doc = await prisma.document.findUnique({ where: { id: docId } });
+    if (!doc) return { error: "لا يوجد مستند بهذا الرقم" };
+
+    const filePath = doc.fileUrl.split("/").pop();
+    if (filePath) {
+      await getSupabaseAdmin().storage.from("documents").remove([filePath]);
+    }
+
+    await prisma.document.delete({ where: { id: docId } });
+
+    revalidatePath(`/clients/${doc.clientId}`);
+    return { success: true };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "خطأ غير متوقع" };
   }
-
-  const doc = await prisma.document.findUnique({ where: { id: docId } });
-  if (!doc) return { error: "لا يوجد مستند بهذا الرقم" };
-
-  const filePath = doc.fileUrl.split("/").pop();
-  if (filePath) {
-    await getSupabaseAdmin().storage.from("documents").remove([filePath]);
-  }
-
-  await prisma.document.delete({ where: { id: docId } });
-
-  revalidatePath(`/clients/${doc.clientId}`);
-  return { success: true };
 }
