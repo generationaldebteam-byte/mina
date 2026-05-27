@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Trash2, Download, Eye, Upload } from "lucide-react";
+import { FileText, Trash2, Download, Eye, Upload, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { arSA } from "date-fns/locale";
 import { toast } from "sonner";
-import { UploadButton } from "@/lib/uploadthing";
-import { addDocumentRecord, deleteDocument } from "@/lib/actions";
+import { uploadDocument, deleteDocument } from "@/lib/actions";
 
 interface Document {
   id: string;
@@ -32,6 +31,20 @@ export function DocumentsSection({
 }) {
   const router = useRouter();
   const [uploading, setUploading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  async function handleUpload(formData: FormData) {
+    setUploading(true);
+    const result = await uploadDocument(clientId, formData);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("تم رفع المستند");
+      formRef.current?.reset();
+      router.refresh();
+    }
+    setUploading(false);
+  }
 
   async function handleDelete(docId: string) {
     const result = await deleteDocument(docId);
@@ -53,24 +66,20 @@ export function DocumentsSection({
           المستندات
         </CardTitle>
         <div className="shrink-0">
-          <UploadButton
-            endpoint="documentUploader"
-            onUploadBegin={() => setUploading(true)}
-            onUploadError={(error) => {
-              toast.error(error.message);
-              setUploading(false);
-            }}
-            onClientUploadComplete={async (res) => {
-              if (res?.[0]) {
-                const file = res[0];
-                await addDocumentRecord(clientId, file.name, file.url);
-                toast.success("تم رفع المستند");
-                router.refresh();
-              }
-              setUploading(false);
-            }}
-            className="ut-button:bg-primary ut-button:text-primary-foreground ut-button:hover:bg-primary/90 ut-button:font-bold ut-button:text-sm ut-allowed-content:hidden"
-          />
+          <form ref={formRef} action={handleUpload} className="flex items-center gap-2">
+            <input
+              type="file"
+              name="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              required
+              className="text-sm file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
+              disabled={uploading}
+            />
+            <Button type="submit" disabled={uploading} size="sm" className="font-bold text-xs h-8">
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5 ml-1" />}
+              {uploading ? "جاري الرفع..." : "رفع"}
+            </Button>
+          </form>
         </div>
       </CardHeader>
       <CardContent className="pt-6">
