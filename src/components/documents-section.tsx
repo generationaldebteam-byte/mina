@@ -99,7 +99,7 @@ export function DocumentsSection({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0 flex-wrap">
                   <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" size="sm" className="h-8 px-2 font-bold text-xs">
                       <Eye className="h-3.5 w-3.5 ml-1" />

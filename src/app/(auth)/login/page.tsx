@@ -31,7 +31,7 @@ export default async function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="you@office.local"
+                placeholder="name@example.com"
                 required
                 autoComplete="email"
               />

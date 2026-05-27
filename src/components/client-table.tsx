@@ -168,6 +168,7 @@ export function ClientTable() {
       </div>
 
       <div className="rounded-xl border-2 shadow-sm bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/60 border-b-2">
@@ -242,15 +243,16 @@ export function ClientTable() {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {!loading && data && data.total > ITEMS_PER_PAGE && (
-        <div className="flex items-center justify-between bg-white dark:bg-gray-900 rounded-xl border-2 p-4 shadow-sm">
-          <p className="text-sm font-semibold text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-gray-900 rounded-xl border-2 p-4 shadow-sm">
+          <p className="text-xs sm:text-sm font-semibold text-muted-foreground order-2 sm:order-1">
             عرض {(page - 1) * ITEMS_PER_PAGE + 1} إلى{" "}
             {Math.min(page * ITEMS_PER_PAGE, data.total)} من {data.total} عميل
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 order-1 sm:order-2">
             <Button
               variant="outline"
               size="sm"

@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   CalendarIcon,
   AlertTriangle,
-  Clock,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isPast, isSameDay } from "date-fns";
 import { arSA } from "date-fns/locale";
@@ -84,22 +83,22 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <CalendarIcon className="h-5 w-5" />
-          {format(currentDate, "MMMM yyyy", { locale: arSA })}
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <CalendarIcon className="h-5 w-5 shrink-0" />
+          <span className="truncate">{format(currentDate, "MMMM yyyy", { locale: arSA })}</span>
         </CardTitle>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToday}>اليوم</Button>
-          <Button variant="outline" size="icon" onClick={prevMonth}>
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <Button variant="outline" size="sm" onClick={goToday} className="text-xs sm:text-sm h-8 sm:h-9">اليوم</Button>
+          <Button variant="outline" size="icon" onClick={prevMonth} className="h-8 w-8 sm:h-9 sm:w-9">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={nextMonth}>
+          <Button variant="outline" size="icon" onClick={nextMonth} className="h-8 w-8 sm:h-9 sm:w-9">
             <ChevronLeft className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden border">
+        <div className="hidden sm:grid sm:grid-cols-7 gap-px bg-border rounded-lg overflow-hidden border">
           {weekDays.map((day) => (
             <div
               key={day}
@@ -118,7 +117,7 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
               <button
                 key={index}
                 onClick={() => setSelectedDate(day)}
-                className={`bg-background p-2 min-h-[80px] text-right transition-colors hover:bg-accent ${
+                className={`bg-background p-1 sm:p-2 min-h-[60px] sm:min-h-[80px] text-right transition-colors hover:bg-accent ${
                   !isCurrentMonth ? "opacity-40" : ""
                 } ${isSelected ? "bg-accent" : ""}`}
               >
@@ -126,7 +125,7 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
                   <span
                     className={`text-xs font-medium ${
                       isTodayDate
-                        ? "flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                        ? "flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
                         : ""
                     }`}
                   >
@@ -139,12 +138,12 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
                   )}
                 </div>
                 <div className="space-y-0.5">
-                  {dayEvents.slice(0, 3).map((event) => {
+                  {dayEvents.slice(0, 2).map((event) => {
                     const isOverdue = isPast(event.date) && event.status === "PENDING";
                     return (
                       <div
                         key={event.id}
-                        className={`text-[10px] truncate px-1 py-0.5 rounded ${
+                        className={`text-[9px] sm:text-[10px] truncate px-1 py-0.5 rounded ${
                           isOverdue
                             ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                             : "bg-muted/50 text-muted-foreground"
@@ -155,9 +154,9 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
                       </div>
                     );
                   })}
-                  {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-muted-foreground px-1">
-                      +{dayEvents.length - 3} أخرى
+                  {dayEvents.length > 2 && (
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground px-1">
+                      +{dayEvents.length - 2}
                     </div>
                   )}
                 </div>
@@ -166,8 +165,48 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
           })}
         </div>
 
+        <div className="sm:hidden space-y-2">
+          {allDays.filter(d => isSameMonth(d, currentDate)).map((day) => {
+            const dayEvents = getEventsForDay(day);
+            if (dayEvents.length === 0) return null;
+            const isTodayDate = isToday(day);
+            const isSelected = selectedDate && isSameDay(day, selectedDate);
+
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => setSelectedDate(day)}
+                className={`w-full text-right rounded-lg border p-3 transition-colors hover:bg-accent ${
+                  isTodayDate ? "border-primary bg-primary/5" : "border-border"
+                } ${isSelected ? "bg-accent" : ""}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-sm font-bold ${isTodayDate ? "text-primary" : ""}`}>
+                    {format(day, "d MMMM", { locale: arSA })}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {dayEvents.length} {dayEvents.length > 1 ? "مهام" : "مهمة"}
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {dayEvents.map((event) => {
+                    const isOverdue = isPast(event.date) && event.status === "PENDING";
+                    return (
+                      <div key={event.id} className="flex items-center gap-2 text-sm">
+                        <div className={`h-2 w-2 shrink-0 rounded-full ${isOverdue ? "bg-red-500" : priorityColors[event.priority] || "bg-gray-500"}`} />
+                        <span className="truncate font-medium">{event.title}</span>
+                        <Badge variant="outline" className="text-xs mr-auto shrink-0">{typeLabels[event.type]}</Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
         {selectedDate && selectedEvents.length > 0 && (
-          <div className="mt-4 space-y-2">
+          <div className="hidden sm:block mt-4 space-y-2">
             <h3 className="text-sm font-medium">
               مهام {format(selectedDate, "d MMMM yyyy", { locale: arSA })}
             </h3>
@@ -184,19 +223,19 @@ export function Calendar({ events }: { events: CalendarEvent[] }) {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <div
-                          className={`h-2 w-2 rounded-full ${
+                          className={`h-2 w-2 shrink-0 rounded-full ${
                             isOverdue ? "bg-red-500" : priorityColors[event.priority] || "bg-gray-500"
                           }`}
                         />
-                        <span className="text-sm font-medium">{event.title}</span>
+                        <span className="text-sm font-medium truncate">{event.title}</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs shrink-0">
                         {typeLabels[event.type]}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 mr-4">
+                    <div className="flex items-center gap-2 mt-1 mr-4 flex-wrap">
                       <span className="text-xs text-muted-foreground">
                         {event.clientName}
                       </span>

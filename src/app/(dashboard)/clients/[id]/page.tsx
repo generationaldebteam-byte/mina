@@ -61,6 +61,7 @@ export default async function ClientDetailsPage({
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
+        <div className="overflow-x-auto pb-1">
         <TabsList>
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
           <TabsTrigger value="deadlines">المواعيد</TabsTrigger>
@@ -69,6 +70,7 @@ export default async function ClientDetailsPage({
           <TabsTrigger value="timeline">السجل</TabsTrigger>
           <TabsTrigger value="interactions">التفاعلات</TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-3">

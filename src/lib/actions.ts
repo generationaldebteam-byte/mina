@@ -57,7 +57,7 @@ export async function createClient(formData: FormData) {
     revalidatePath("/dashboard");
     return { success: true };
   } catch {
-    return { error: "��� ������ ����� ������" };
+    return { error: "حدث خطأ أثناء إنشاء العميل" };
   }
 }
 
@@ -85,7 +85,7 @@ export async function addCaseUpdate(clientId: string, note: string) {
   const session = await getSession();
 
   if (!note.trim()) {
-    return { error: "�� ���� �� ���� �������� �����" };
+    return { error: "لا يمكن إضافة ملاحظة فارغة" };
   }
 
   await prisma.caseUpdate.create({
@@ -103,7 +103,7 @@ export async function addCaseUpdate(clientId: string, note: string) {
 export async function deleteClient(clientId: string) {
   const session = await getSession();
   if ((session.user as any).role !== "ADMIN") {
-    return { error: "���� �������� ��� ��� �������" };
+    return { error: "ليس لديك صلاحية لحذف العملاء" };
   }
 
   await prisma.client.delete({
@@ -117,7 +117,7 @@ export async function deleteClient(clientId: string) {
 export async function updateClient(clientId: string, formData: FormData) {
   const session = await getSession();
   if ((session.user as any).role !== "ADMIN") {
-    return { error: "���� �������� ��� ����� �������" };
+    return { error: "ليس لديك صلاحية لتعديل العملاء" };
   }
 
   const rawData = {
@@ -158,7 +158,7 @@ export async function updateClient(clientId: string, formData: FormData) {
     revalidatePath("/dashboard");
     return { success: true };
   } catch {
-    return { error: "��� ������ ����� ������" };
+    return { error: "حدث خطأ أثناء تعديل العميل" };
   }
 }
 
@@ -175,7 +175,7 @@ export async function createTask(formData: FormData) {
   const priority = formData.get("priority") as TaskPriority;
 
   if (!title || !dueDate) {
-    return { error: "������� ������ ��������� �������" };
+    return { error: "العنوان والتاريخ مطلوبان" };
   }
 
   await prisma.task.create({
@@ -197,7 +197,7 @@ export async function createTask(formData: FormData) {
 
 export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
-  if (!task) return { error: "�� ��� ������ ��� ������" };
+  if (!task) return { error: "لم يتم العثور على المهمة" };
 
   await prisma.task.update({
     where: { id: taskId },
@@ -211,7 +211,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
 
 export async function deleteTask(taskId: string) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
-  if (!task) return { error: "�� ��� ������ ��� ������" };
+  if (!task) return { error: "لم يتم العثور على المهمة" };
 
   await prisma.task.delete({ where: { id: taskId } });
 
@@ -222,7 +222,7 @@ export async function deleteTask(taskId: string) {
 
 export async function updateTask(taskId: string, formData: FormData) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
-  if (!task) return { error: "�� ��� ������ ��� ������" };
+  if (!task) return { error: "لم يتم العثور على المهمة" };
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
@@ -231,7 +231,7 @@ export async function updateTask(taskId: string, formData: FormData) {
   const priority = formData.get("priority") as TaskPriority;
 
   if (!title || !dueDate) {
-    return { error: "������� ������ ��������� �������" };
+    return { error: "العنوان والتاريخ مطلوبان" };
   }
 
   await prisma.task.update({
@@ -248,7 +248,7 @@ export async function updateTask(taskId: string, formData: FormData) {
 
 export async function toggleChecklistItem(itemId: string) {
   const item = await prisma.clientChecklistItem.findUnique({ where: { id: itemId } });
-  if (!item) return { error: "�� ��� ������ ��� ������" };
+  if (!item) return { error: "لم يتم العثور على العنصر" };
 
   await prisma.clientChecklistItem.update({
     where: { id: itemId },
@@ -264,7 +264,7 @@ export async function addChecklistItem(formData: FormData) {
   const title = formData.get("title") as string;
   const required = formData.get("required") === "true";
 
-  if (!title) return { error: "������� �����" };
+  if (!title) return { error: "العنوان مطلوب" };
 
   await prisma.clientChecklistItem.create({ data: { clientId, title, required } });
 
@@ -274,7 +274,7 @@ export async function addChecklistItem(formData: FormData) {
 
 export async function deleteChecklistItem(itemId: string) {
   const item = await prisma.clientChecklistItem.findUnique({ where: { id: itemId } });
-  if (!item) return { error: "�� ��� ������ ��� ������" };
+  if (!item) return { error: "لم يتم العثور على العنصر" };
 
   await prisma.clientChecklistItem.delete({ where: { id: itemId } });
 
@@ -314,7 +314,7 @@ export async function addInteraction(formData: FormData) {
   const type = formData.get("type") as InteractionType;
   const note = formData.get("note") as string;
 
-  if (!note.trim()) return { error: "�� ���� �� ���� �������� �����" };
+  if (!note.trim()) return { error: "لا يمكن إضافة ملاحظة فارغة" };
 
   await prisma.clientInteraction.create({
     data: { clientId, type: type || InteractionType.OTHER, note: note.trim(), createdById: (session.user as any).id },

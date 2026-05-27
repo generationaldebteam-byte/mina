@@ -135,7 +135,7 @@ export function TasksSection({ clientId, tasks }: { clientId: string; tasks: Tas
                 <Label htmlFor="dueDate" className="font-bold">تاريخ الاستحقاق *</Label>
                 <Input id="dueDate" name="dueDate" type="date" required className="border-2 font-medium" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="type" className="font-bold">النوع</Label>
                   <Select name="type" defaultValue="OTHER">
@@ -242,7 +242,7 @@ function TaskRow({ task, urgency }: { task: Task; urgency: string }) {
       <form action={handleEdit} className="border-2 rounded-xl p-4 space-y-3 bg-background">
         <Input name="title" defaultValue={task.title} required className="border-2 font-medium" />
         <Input name="dueDate" type="date" defaultValue={format(task.dueDate, "yyyy-MM-dd")} required className="border-2 font-medium" />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Select name="type" defaultValue={task.type}>
             <SelectTrigger className="border-2"><SelectValue /></SelectTrigger>
             <SelectContent>
