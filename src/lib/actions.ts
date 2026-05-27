@@ -343,6 +343,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export async function uploadDocument(clientId: string, formData: FormData) {
   try {
     const session = await getSession();
+    const userId = (session.user as any).id;
 
     const file = formData.get("file") as File;
     if (!file || file.size === 0) {
@@ -361,7 +362,7 @@ export async function uploadDocument(clientId: string, formData: FormData) {
     const uniqueName = `${crypto.randomUUID()}.${ext}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { error: uploadError } = await getSupabaseAdmin().storage
+    const { data: uploadData, error: uploadError } = await getSupabaseAdmin().storage
       .from("documents")
       .upload(uniqueName, buffer, {
         contentType: file.type,
