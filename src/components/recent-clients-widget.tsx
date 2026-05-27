@@ -48,15 +48,15 @@ export async function RecentClientsWidget() {
       <CardContent>
         <div className="space-y-2">
           {clients.map((client) => (
-            <Link key={client.id} href={`/clients/${client.id}`}>
-              <div className="rounded-lg border p-2.5 hover:bg-accent cursor-pointer transition-colors">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{client.fullName}</p>
-                  <Badge className={statusColors[client.status]} variant="secondary">
+            <Link key={client.id} href={`/clients/${client.id}`} className="block">
+              <div className="rounded-xl border p-3 hover:bg-accent active:scale-[0.98] transition-all">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-bold truncate">{client.fullName}</p>
+                  <Badge className={`${statusColors[client.status]} text-xs shrink-0`} variant="secondary">
                     {statusLabels[client.status]}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className="text-xs text-muted-foreground font-mono">{client.caseNumber}</span>
                   <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(client.updatedAt, { addSuffix: true, locale: arSA })}

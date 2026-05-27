@@ -61,19 +61,19 @@ export async function UrgentCasesWidget() {
       <CardContent className="space-y-4">
         {overdueTasks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-2 flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" />
+            <p className="text-xs font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5" />
               متأخر ({overdueTasks.length})
             </p>
             <div className="space-y-2">
               {overdueTasks.map((task) => (
-                <Link key={task.id} href={`/clients/${task.client.id}`}>
-                  <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 p-2.5 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{task.title}</p>
-                      <Badge variant="destructive" className="text-xs">متأخر</Badge>
+                <Link key={task.id} href={`/clients/${task.client.id}`} className="block">
+                  <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 p-3 hover:bg-red-100 dark:hover:bg-red-950/40 active:scale-[0.98] transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold truncate">{task.title}</p>
+                      <Badge variant="destructive" className="text-xs shrink-0">متأخر</Badge>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-xs text-muted-foreground">{task.client.fullName}</span>
                       <span className="text-xs text-muted-foreground font-mono">{task.client.caseNumber}</span>
                       <span className="text-xs text-red-600 dark:text-red-400">{format(task.dueDate, "d MMM", { locale: arSA })}</span>
@@ -87,21 +87,21 @@ export async function UrgentCasesWidget() {
 
         {upcomingTasks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-yellow-600 dark:text-yellow-400 mb-2 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+            <p className="text-xs font-bold text-yellow-600 dark:text-yellow-400 mb-2 flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
               يستحق هذا الأسبوع ({upcomingTasks.length})
             </p>
             <div className="space-y-2">
               {upcomingTasks.map((task) => (
-                <Link key={task.id} href={`/clients/${task.client.id}`}>
-                  <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900 p-2.5 hover:bg-yellow-100 dark:hover:bg-yellow-950/40 cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{task.title}</p>
-                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs">
+                <Link key={task.id} href={`/clients/${task.client.id}`} className="block">
+                  <div className="rounded-xl border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900 p-3 hover:bg-yellow-100 dark:hover:bg-yellow-950/40 active:scale-[0.98] transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold truncate">{task.title}</p>
+                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs shrink-0">
                         {typeLabels[task.type]}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-xs text-muted-foreground">{task.client.fullName}</span>
                       <span className="text-xs text-muted-foreground font-mono">{task.client.caseNumber}</span>
                       <span className="text-xs text-yellow-600 dark:text-yellow-400">{format(task.dueDate, "d MMM", { locale: arSA })}</span>

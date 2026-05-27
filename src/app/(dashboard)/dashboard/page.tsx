@@ -24,8 +24,12 @@ export default async function DashboardPage() {
   const stats = await getStats();
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-4 md:space-y-6">
+      <div>
+        <h2 className="text-xl md:text-2xl font-black">لوحة التحكم</h2>
+        <p className="text-sm text-muted-foreground mt-1">نظرة عامة على جميع القضايا</p>
+      </div>
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard title="إجمالي العملاء" value={stats.total} icon={Users} description="جميع العملاء في النظام" color="blue" />
         <StatCard title="القضايا النشطة" value={stats.active} icon={Clock} description="قيد العمل حالياً" color="amber" />
         <StatCard title="بانتظار القرار" value={stats.waiting} icon={Hourglass} description="قيد المراجعة" color="orange" />
@@ -63,10 +67,10 @@ function StatCard({
   color: string;
 }) {
   const colorMap: Record<string, string> = {
-    blue: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
-    amber: "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800",
-    orange: "bg-orange-50 border-orange-200 dark:bg-orange-950/30 dark:border-orange-800",
-    green: "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800",
+    blue: "bg-blue-50/80 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
+    amber: "bg-amber-50/80 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800",
+    orange: "bg-orange-50/80 border-orange-200 dark:bg-orange-950/30 dark:border-orange-800",
+    green: "bg-green-50/80 border-green-200 dark:bg-green-950/30 dark:border-green-800",
   };
 
   const iconColorMap: Record<string, string> = {
@@ -77,16 +81,16 @@ function StatCard({
   };
 
   return (
-    <Card className={`border-2 shadow-md ${colorMap[color]}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-bold">{title}</CardTitle>
-        <div className={`p-2 rounded-lg ${iconColorMap[color]}`}>
-          <Icon className="h-5 w-5" />
+    <Card className={`border-2 shadow-sm ${colorMap[color]}`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+        <CardTitle className="text-[11px] md:text-sm font-bold">{title}</CardTitle>
+        <div className={`p-1.5 md:p-2 rounded-lg ${iconColorMap[color]}`}>
+          <Icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-black">{value}</div>
-        <p className="text-xs font-medium mt-1 opacity-70">{description}</p>
+        <div className="text-xl md:text-3xl font-black">{value}</div>
+        <p className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1 opacity-70">{description}</p>
       </CardContent>
     </Card>
   );

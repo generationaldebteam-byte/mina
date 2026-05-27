@@ -55,18 +55,21 @@ export async function CasesByStatusWidget() {
             return (
               <div key={key}>
                 <div className="flex items-center justify-between text-sm mb-1">
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="font-medium">{count}</span>
+                  <span className="font-medium">{label}</span>
+                  <span className="font-bold">{count}</span>
                 </div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${statusColors[key]} transition-all`}
+                    className={`h-full ${statusColors[key]} rounded-full transition-all duration-500`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
               </div>
             );
           })}
+          {total === 0 && (
+            <p className="text-center text-sm text-muted-foreground py-4">لا توجد قضايا بعد</p>
+          )}
         </div>
       </CardContent>
     </Card>

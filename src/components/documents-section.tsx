@@ -65,18 +65,18 @@ export function DocumentsSection({
           </div>
           المستندات
         </CardTitle>
-        <div className="shrink-0">
-          <form ref={formRef} action={handleUpload} className="flex items-center gap-2">
+        <div className="shrink-0 max-w-[200px] sm:max-w-none">
+          <form ref={formRef} action={handleUpload} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <input
               type="file"
               name="file"
               accept=".pdf,.png,.jpg,.jpeg"
               required
-              className="text-sm file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors"
+              className="text-xs sm:text-sm file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-bold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer file:transition-colors file:active:scale-95"
               disabled={uploading}
             />
-            <Button type="submit" disabled={uploading} size="sm" className="font-bold text-xs h-8">
-              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5 ml-1" />}
+            <Button type="submit" disabled={uploading} size="sm" className="font-bold text-xs h-9 shrink-0">
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
               {uploading ? "جاري الرفع..." : "رفع"}
             </Button>
           </form>

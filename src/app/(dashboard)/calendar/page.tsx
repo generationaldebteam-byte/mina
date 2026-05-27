@@ -45,18 +45,20 @@ export default async function CalendarPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <CalendarIcon className="h-6 w-6 text-primary" />
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-3 md:gap-4">
+        <div className="p-2 md:p-3 rounded-xl bg-primary/10">
+          <CalendarIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+        </div>
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">التقويم</h2>
-          <p className="text-muted-foreground">مواعيد ومهام القضايا</p>
+          <h2 className="text-xl md:text-2xl font-black">التقويم</h2>
+          <p className="text-xs md:text-sm text-muted-foreground mt-0.5">مواعيد ومهام القضايا</p>
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap mb-4">
+      <div className="flex gap-1.5 flex-wrap">
         {Object.entries(typeLabels).map(([key, label]) => (
-          <Badge key={key} variant="outline" className="text-xs">
+          <Badge key={key} variant="outline" className="text-[10px] md:text-xs">
             {label}
           </Badge>
         ))}
@@ -64,11 +66,14 @@ export default async function CalendarPage() {
 
       <Calendar events={events} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">المهام القادمة</CardTitle>
+      <Card className="border-2 shadow-sm">
+        <CardHeader className="border-b-2 bg-muted/20">
+          <CardTitle className="flex items-center gap-2 text-sm md:text-base font-black">
+            <CalendarIcon className="h-4 w-4" />
+            المهام القادمة
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4 md:pt-6">
           <div className="space-y-2">
             {tasks
               .filter((t) => t.status === "PENDING")
@@ -77,24 +82,25 @@ export default async function CalendarPage() {
                 <Link
                   key={task.id}
                   href={`/clients/${task.client.id}`}
+                  className="block"
                 >
-                  <div className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between rounded-xl border-2 p-3 hover:bg-accent active:scale-[0.98] transition-all">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`h-2 w-2 rounded-full ${priorityColors[task.priority] || "bg-gray-500"}`}
+                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${priorityColors[task.priority] || "bg-gray-500"}`}
                       />
-                      <div>
-                        <p className="text-sm font-medium">{task.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {task.client.fullName} — {task.client.caseNumber}
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold truncate">{task.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {task.client.fullName}
                         </p>
                       </div>
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm text-muted-foreground">
+                    <div className="text-left shrink-0 mr-2">
+                      <p className="text-xs text-muted-foreground font-medium">
                         {typeLabels[task.type]}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] md:text-xs text-muted-foreground">
                         {new Date(task.dueDate).toLocaleDateString("ar-SA")}
                       </p>
                     </div>
@@ -102,9 +108,10 @@ export default async function CalendarPage() {
                 </Link>
               ))}
             {tasks.filter((t) => t.status === "PENDING").length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-4">
-                لا توجد مهام قادمة
-              </p>
+              <div className="text-center py-8">
+                <CalendarIcon className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm font-medium text-muted-foreground">لا توجد مهام قادمة</p>
+              </div>
             )}
           </div>
         </CardContent>

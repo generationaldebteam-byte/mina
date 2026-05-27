@@ -49,7 +49,7 @@ export function Sidebar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-3 right-3 z-50 flex md:hidden h-9 w-9 items-center justify-center rounded-lg border-2 bg-background shadow-sm hover:bg-muted transition-all"
+        className="fixed top-3 left-3 z-50 flex md:hidden h-10 w-10 items-center justify-center rounded-xl border-2 bg-background shadow-md hover:bg-muted active:scale-95 transition-all"
         aria-label="فتح القائمة"
       >
         <Menu className="h-5 w-5" />
@@ -89,16 +89,16 @@ export function Sidebar() {
           <nav className="flex-1 space-y-1 px-3 py-4">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all",
+                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border-2 border-transparent hover:border-border"
                   )}
                 >
                   <Icon className="h-5 w-5" />

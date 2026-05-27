@@ -9,6 +9,7 @@ import { InteractionsSection } from "@/components/interactions-section";
 import { DocumentsSection } from "@/components/documents-section";
 import { TimelineSection } from "@/components/timeline-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText as FileTextIcon } from "lucide-react";
 import { initChecklist } from "@/lib/actions";
 
 export default async function ClientDetailsPage({
@@ -54,34 +55,39 @@ export default async function ClientDetailsPage({
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">{client.fullName}</h2>
-        <p className="text-muted-foreground font-mono text-sm">{client.caseNumber}</p>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 md:p-3 rounded-xl bg-primary/10">
+          <FileTextIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-xl md:text-2xl font-black">{client.fullName}</h2>
+          <p className="text-muted-foreground font-mono text-xs md:text-sm">{client.caseNumber}</p>
+        </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <div className="overflow-x-auto pb-1">
-        <TabsList>
-          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="deadlines">المواعيد</TabsTrigger>
-          <TabsTrigger value="checklist">القائمة</TabsTrigger>
-          <TabsTrigger value="documents">المستندات</TabsTrigger>
-          <TabsTrigger value="timeline">السجل</TabsTrigger>
-          <TabsTrigger value="interactions">التفاعلات</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
+        <div className="overflow-x-auto pb-1 -mx-3 px-3 md:mx-0 md:px-0">
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="deadlines" className="text-xs md:text-sm">المواعيد</TabsTrigger>
+          <TabsTrigger value="checklist" className="text-xs md:text-sm">القائمة</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs md:text-sm">المستندات</TabsTrigger>
+          <TabsTrigger value="timeline" className="text-xs md:text-sm">السجل</TabsTrigger>
+          <TabsTrigger value="interactions" className="text-xs md:text-sm">التفاعلات</TabsTrigger>
         </TabsList>
         </div>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
+        <TabsContent value="overview" className="space-y-4 md:space-y-6">
+          <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-4 md:space-y-6">
               <ClientInfoCard client={client} />
               <TimelineSection
                 clientId={client.id}
                 updates={client.caseUpdates}
               />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               <StatusCard client={client} />
               <QuickOverview
                 tasks={client.tasks}
@@ -145,36 +151,38 @@ async function QuickOverview({
   const missingRequired = checklist.filter((i) => i.required && !i.completed);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {overdueTasks.length > 0 && (
-        <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 p-3">
-          <p className="text-sm font-medium text-red-700 dark:text-red-400">
-            {overdueTasks.length} موعد {overdueTasks.length > 1 ? "متأخر" : "متأخر"}
+        <div className="rounded-xl border-2 border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 p-3">
+          <p className="text-sm font-bold text-red-700 dark:text-red-400">
+            {overdueTasks.length} موعد{overdueTasks.length > 1 ? " متأخرة" : " متأخر"}
           </p>
-          <ul className="text-xs text-red-600 dark:text-red-300 mt-1 space-y-0.5">
+          <ul className="text-xs text-red-600 dark:text-red-300 mt-1.5 space-y-1">
             {overdueTasks.slice(0, 3).map((t) => (
-              <li key={t.id}>• {t.title}</li>
+              <li key={t.id} className="flex items-center gap-1.5">• {t.title}</li>
             ))}
           </ul>
         </div>
       )}
 
-      <div className="rounded-lg border p-3">
-        <p className="text-sm font-medium mb-1">المستندات</p>
-        <p className="text-sm text-muted-foreground">
-          {completedChecklist} / {totalChecklist} مكتمل
-        </p>
+      <div className="rounded-xl border-2 p-3">
+        <p className="text-sm font-bold mb-1.5">المستندات المطلوبة</p>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-2xl font-black">{completedChecklist}</span>
+          <span className="text-sm text-muted-foreground">/ {totalChecklist}</span>
+          <span className="text-sm text-muted-foreground mr-1">مكتمل</span>
+        </div>
         {missingRequired.length > 0 && (
-          <p className="text-xs text-red-500 mt-1">{missingRequired.length} مطلوب ناقص</p>
+          <p className="text-xs font-medium text-red-500 mt-1.5">{missingRequired.length} مستند مطلوب ناقص</p>
         )}
       </div>
 
       {interactions.length > 0 && (
-        <div className="rounded-lg border p-3">
-          <p className="text-sm font-medium mb-1">آخر تواصل</p>
-          <p className="text-sm text-muted-foreground">{interactions[0].note}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            بواسطة {interactions[0].createdBy.name} · {new Date(interactions[0].createdAt).toLocaleDateString("ar-SA")}
+        <div className="rounded-xl border-2 p-3">
+          <p className="text-sm font-bold mb-1.5">آخر تواصل</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">{interactions[0].note}</p>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            بواسطة {interactions[0].createdBy.name}
           </p>
         </div>
       )}
