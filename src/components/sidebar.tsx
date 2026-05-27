@@ -13,6 +13,7 @@ import {
   Calendar,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { useState, useEffect } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
+  { href: "/clients", label: "العملاء", icon: Users },
   { href: "/calendar", label: "التقويم", icon: Calendar },
   { href: "/clients/new", label: "إضافة عميل", icon: PlusCircle },
 ];
