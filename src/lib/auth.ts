@@ -4,6 +4,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
   pages: { signIn: "/login" },
   providers: [
     Credentials({
