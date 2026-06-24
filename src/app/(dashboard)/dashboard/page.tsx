@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, Hourglass, CheckCircle } from "lucide-react";
+import { Users, Clock, Hourglass, CheckCircle, ArrowLeft } from "lucide-react";
 import { ClientTable } from "@/components/client-table";
 import { UrgentCasesWidget } from "@/components/urgent-cases-widget";
 import { RecentClientsWidget } from "@/components/recent-clients-widget";
@@ -30,10 +31,10 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted-foreground mt-1">نظرة عامة على جميع القضايا</p>
       </div>
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
-        <StatCard title="إجمالي العملاء" value={stats.total} icon={Users} description="جميع العملاء في النظام" color="blue" />
-        <StatCard title="القضايا النشطة" value={stats.active} icon={Clock} description="قيد العمل حالياً" color="amber" />
-        <StatCard title="بانتظار القرار" value={stats.waiting} icon={Hourglass} description="قيد المراجعة" color="orange" />
-        <StatCard title="القضايا المغلقة" value={stats.closed} icon={CheckCircle} description="تم حلها أو إغلاقها" color="green" />
+        <StatCard title="إجمالي العملاء" value={stats.total} icon={Users} description="جميع العملاء في النظام" color="blue" href="/clients" />
+        <StatCard title="القضايا النشطة" value={stats.active} icon={Clock} description="قيد العمل حالياً" color="amber" href="/clients?status=active" />
+        <StatCard title="بانتظار القرار" value={stats.waiting} icon={Hourglass} description="قيد المراجعة" color="orange" href="/clients?status=WAITING_DECISION" />
+        <StatCard title="القضايا المغلقة" value={stats.closed} icon={CheckCircle} description="تم حلها أو إغلاقها" color="green" href="/clients?status=closed" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -59,12 +60,14 @@ function StatCard({
   icon: Icon,
   description,
   color,
+  href,
 }: {
   title: string;
   value: number;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   color: string;
+  href: string;
 }) {
   const colorMap: Record<string, string> = {
     blue: "bg-blue-50/80 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
@@ -81,17 +84,19 @@ function StatCard({
   };
 
   return (
-    <Card className={`border-2 shadow-sm ${colorMap[color]}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
-        <CardTitle className="text-[11px] md:text-sm font-bold">{title}</CardTitle>
-        <div className={`p-1.5 md:p-2 rounded-lg ${iconColorMap[color]}`}>
-          <Icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-xl md:text-3xl font-black">{value}</div>
-        <p className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1 opacity-70">{description}</p>
-      </CardContent>
-    </Card>
+    <Link href={href} className="block">
+      <Card className={`border-2 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer active:scale-[0.98] ${colorMap[color]}`}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+          <CardTitle className="text-[11px] md:text-sm font-bold">{title}</CardTitle>
+          <div className={`p-1.5 md:p-2 rounded-lg ${iconColorMap[color]}`}>
+            <Icon className="h-3.5 w-3.5 md:h-5 md:w-5" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-xl md:text-3xl font-black">{value}</div>
+          <p className="text-[10px] md:text-xs font-medium mt-0.5 md:mt-1 opacity-70">{description}</p>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

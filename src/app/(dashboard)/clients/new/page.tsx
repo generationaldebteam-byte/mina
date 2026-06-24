@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,58 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { createClient } from "@/lib/actions";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
+
+const DRAFT_KEY = "new-client-draft";
 
 export default function NewClientPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    const draft = localStorage.getItem(DRAFT_KEY);
+    if (draft && formRef.current) {
+      try {
+        const data = JSON.parse(draft);
+        Object.entries(data).forEach(([key, value]) => {
+          const input = formRef.current?.elements.namedItem(key) as HTMLInputElement | HTMLTextAreaElement | null;
+          if (input) input.value = value as string;
+        });
+        toast.info("تم استعادة المسودة المحفوظة", { duration: 2000 });
+      } catch {}
+    }
+  }, []);
+
+  const debouncedSave = useCallback((formData: Record<string, string>) => {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+      setDraftSaved(true);
+    }, 1000);
+  }, []);
+
+  function handleChange(e: React.ChangeEvent<HTMLFormElement>) {
+    if (e.target.name && !["submit", "button"].includes(e.target.type)) {
+      const form = e.currentTarget;
+      const data: Record<string, string> = {};
+      Array.from(form.elements).forEach((el) => {
+        const input = el as HTMLInputElement | HTMLTextAreaElement;
+        if (input.name) data[input.name] = input.value;
+      });
+      debouncedSave(data);
+    }
+  }
+
+  function clearDraft() {
+    localStorage.removeItem(DRAFT_KEY);
+    if (formRef.current) formRef.current.reset();
+    setDraftSaved(false);
+    toast.success("تم حذف المسودة");
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,6 +72,7 @@ export default function NewClientPage() {
     if (result.error) {
       toast.error(result.error);
     } else {
+      localStorage.removeItem(DRAFT_KEY);
       toast.success("تم إضافة العميل بنجاح");
       router.push("/dashboard");
     }
@@ -34,83 +81,103 @@ export default function NewClientPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="icon">
-            <ArrowRight className="h-4 w-4" />
+    <div className="max-w-2xl space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard">
+            <Button variant="ghost" size="icon">
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">إضافة عميل جديد</h2>
+            <p className="text-sm text-muted-foreground">أدخل بيانات العميل أدناه</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {draftSaved && (
+            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+              <Save className="h-3 w-3" />
+              تم الحفظ
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs font-medium text-destructive hover:text-destructive"
+            onClick={clearDraft}
+          >
+            <Trash2 className="h-3.5 w-3.5 ml-1" />
+            مسح المسودة
           </Button>
-        </Link>
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">إضافة عميل جديد</h2>
-          <p className="text-muted-foreground">أدخل بيانات العميل أدناه.</p>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>بيانات العميل</CardTitle>
+      <Card className="border-2 shadow-sm">
+        <CardHeader className="border-b-2 bg-muted/20">
+          <CardTitle className="text-lg font-black">بيانات العميل</CardTitle>
           <CardDescription>الحقول المطلوبة محددة بعلامة *</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
+        <CardContent className="pt-6">
+          <form ref={formRef} onSubmit={onSubmit} onChange={handleChange} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="fullName">الاسم الكامل *</Label>
-                <Input id="fullName" name="fullName" required placeholder="أحمد محمد" />
+                <Label htmlFor="fullName" className="font-bold text-sm">الاسم الكامل *</Label>
+                <Input id="fullName" name="fullName" required placeholder="أحمد محمد" className="border-2" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">الهاتف *</Label>
-                <Input id="phone" name="phone" required placeholder="+966-555-0100" />
+                <Label htmlFor="phone" className="font-bold text-sm">الهاتف *</Label>
+                <Input id="phone" name="phone" required placeholder="+966-555-0100" className="border-2" />
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="caseNumber">رقم القضية *</Label>
-                <Input id="caseNumber" name="caseNumber" required placeholder="ASY-2024-001" />
+                <Label htmlFor="caseNumber" className="font-bold text-sm">رقم القضية *</Label>
+                <Input id="caseNumber" name="caseNumber" required placeholder="ASY-2024-001" className="border-2" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input id="email" name="email" type="email" placeholder="client@email.com" />
+                <Label htmlFor="email" className="font-bold text-sm">البريد الإلكتروني</Label>
+                <Input id="email" name="email" type="email" placeholder="client@email.com" className="border-2" />
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="nationality">الجنسية</Label>
-                <Input id="nationality" name="nationality" placeholder="الدولة" />
+                <Label htmlFor="nationality" className="font-bold text-sm">الجنسية</Label>
+                <Input id="nationality" name="nationality" placeholder="الدولة" className="border-2" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">تاريخ الميلاد</Label>
-                <Input id="dateOfBirth" name="dateOfBirth" type="date" />
+                <Label htmlFor="dateOfBirth" className="font-bold text-sm">تاريخ الميلاد</Label>
+                <Input id="dateOfBirth" name="dateOfBirth" type="date" className="border-2" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="passportNumber">رقم جواز السفر</Label>
-                <Input id="passportNumber" name="passportNumber" placeholder="اختياري" />
+                <Label htmlFor="passportNumber" className="font-bold text-sm">رقم جواز السفر</Label>
+                <Input id="passportNumber" name="passportNumber" placeholder="اختياري" className="border-2" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="caseType">نوع القضية</Label>
-              <Input id="caseType" name="caseType" placeholder="لجوء، استئناف، إلخ." />
+              <Label htmlFor="caseType" className="font-bold text-sm">نوع القضية</Label>
+              <Input id="caseType" name="caseType" placeholder="لجوء، استئناف، إلخ." className="border-2" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">ملاحظات</Label>
+              <Label htmlFor="notes" className="font-bold text-sm">ملاحظات</Label>
               <Textarea
                 id="notes"
                 name="notes"
                 placeholder="ملخص مختصر عن القضية..."
                 rows={3}
+                className="border-2"
               />
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 pt-2">
               <Link href="/dashboard">
-                <Button type="button" variant="outline">إلغاء</Button>
+                <Button type="button" variant="outline" className="font-bold">إلغاء</Button>
               </Link>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="font-bold">
                 {loading ? "جاري الإضافة..." : "إضافة عميل"}
               </Button>
             </div>

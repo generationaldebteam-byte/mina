@@ -9,7 +9,8 @@ import { InteractionsSection } from "@/components/interactions-section";
 import { DocumentsSection } from "@/components/documents-section";
 import { TimelineSection } from "@/components/timeline-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText as FileTextIcon } from "lucide-react";
+import { ProgressStepper } from "@/components/progress-stepper";
+import { Edit, FileText, ArrowLeft } from "lucide-react";
 import { initChecklist } from "@/lib/actions";
 
 export default async function ClientDetailsPage({
@@ -56,18 +57,16 @@ export default async function ClientDetailsPage({
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 md:p-3 rounded-xl bg-primary/10">
-          <FileTextIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-xl md:text-2xl font-black">{client.fullName}</h2>
-          <p className="text-muted-foreground font-mono text-xs md:text-sm">{client.caseNumber}</p>
-        </div>
-      </div>
+      <StickyHeader
+        name={client.fullName}
+        caseNumber={client.caseNumber}
+        status={client.status}
+      >
+        <ProgressStepper currentStatus={client.status} />
+      </StickyHeader>
 
       <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <div className="overflow-x-auto pb-1 -mx-3 px-3 md:mx-0 md:px-0">
+        <div className="overflow-x-auto pb-1 -mx-3 px-3 md:mx-0 md:px-0 sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="overview" className="text-xs md:text-sm">نظرة عامة</TabsTrigger>
           <TabsTrigger value="deadlines" className="text-xs md:text-sm">المواعيد</TabsTrigger>
@@ -129,6 +128,66 @@ export default async function ClientDetailsPage({
           />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+const statusBadge: Record<string, string> = {
+  NEW_CLIENT: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
+  GATHERING_DOCUMENTS: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700",
+  SUBMITTED: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
+  INTERVIEW_SCHEDULED: "bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700",
+  WAITING_DECISION: "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700",
+  APPEAL: "bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-200 dark:border-red-700",
+  APPROVED: "bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
+  REJECTED: "bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700",
+  CLOSED: "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700",
+};
+
+const statusLabels: Record<string, string> = {
+  NEW_CLIENT: "عميل جديد",
+  GATHERING_DOCUMENTS: "جمع المستندات",
+  SUBMITTED: "تم التقديم",
+  INTERVIEW_SCHEDULED: "مقابلة مجدولة",
+  WAITING_DECISION: "بانتظار القرار",
+  APPEAL: "استئناف",
+  APPROVED: "مقبول",
+  REJECTED: "مرفوض",
+  CLOSED: "مغلق",
+};
+
+function StickyHeader({
+  name,
+  caseNumber,
+  status,
+  children,
+}: {
+  name: string;
+  caseNumber: string;
+  status: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b-2 pb-4 pt-3 -mx-4 px-4 md:-mx-6 md:px-6 -mt-1 space-y-3 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 md:p-3 rounded-xl bg-primary/10 shrink-0">
+            <FileText className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-xl md:text-2xl font-black truncate">{name}</h2>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${statusBadge[status] || ""}`}>
+                {statusLabels[status] || status}
+              </span>
+            </div>
+            <p className="text-muted-foreground font-mono text-xs md:text-sm">{caseNumber}</p>
+          </div>
+        </div>
+      </div>
+      <div className="hidden md:block">
+        {children}
+      </div>
     </div>
   );
 }

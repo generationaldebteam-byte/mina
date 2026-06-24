@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Eye, PlusCircle, Settings2, Check } from "lucide-react";
 import { ClientStatus } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -78,6 +78,18 @@ export function ClientTable() {
   const [page, setPage] = useState(parseInt(searchParams.get("page") || "1"));
   const [data, setData] = useState<ClientsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [visibleColumns, setVisibleColumns] = useState({
+    fullName: true,
+    caseNumber: true,
+    status: true,
+    phone: true,
+    updatedAt: true,
+    actions: true,
+  });
+  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
+  const columnMenuRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -96,6 +108,7 @@ export function ClientTable() {
   }, [search, statusFilter, sortBy, sortOrder, page]);
 
   useEffect(() => {
+    setSelectedIndex(-1);
     fetchClients();
   }, [fetchClients]);
 
@@ -132,6 +145,49 @@ export function ClientTable() {
     }
   };
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (columnMenuRef.current && !columnMenuRef.current.contains(e.target as Node)) {
+        setColumnMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const columnLabels: Record<string, string> = {
+    fullName: "الاسم الكامل",
+    caseNumber: "رقم القضية",
+    status: "الحالة",
+    phone: "الهاتف",
+    updatedAt: "آخر تحديث",
+    actions: "إجراءات",
+  };
+
+  const handleTableKeyDown = (e: React.KeyboardEvent) => {
+    if (!data?.clients.length) return;
+    const clients = data.clients;
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.min(prev + 1, clients.length - 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < clients.length) {
+          router.push(`/clients/${clients[selectedIndex].id}`);
+        }
+        break;
+      case "Escape":
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="bg-white dark:bg-gray-900 rounded-xl border-2 shadow-sm p-4">
@@ -164,80 +220,148 @@ export function ClientTable() {
               ))}
             </SelectContent>
           </Select>
+          <div className="relative" ref={columnMenuRef}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 font-bold text-xs h-9 px-2"
+              onClick={() => setColumnMenuOpen(!columnMenuOpen)}
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
+            {columnMenuOpen && (
+              <div className="absolute left-0 top-full mt-1 z-50 w-52 rounded-xl border-2 bg-popover p-2 shadow-xl animate-scale-in">
+                <p className="text-xs font-bold text-muted-foreground px-2 py-1.5">إظهار الأعمدة</p>
+                {Object.entries(columnLabels).map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setVisibleColumns((prev) => ({ ...prev, [key]: !(prev as any)[key] }))}
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm font-medium hover:bg-muted transition-colors"
+                  >
+                    <div className={`h-4 w-4 rounded border-2 flex items-center justify-center transition-colors ${(visibleColumns as any)[key] ? "bg-primary border-primary" : "border-muted-foreground/30"}`}>
+                      {(visibleColumns as any)[key] && <Check className="h-3 w-3 text-primary-foreground" />}
+                    </div>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="rounded-xl border-2 shadow-sm bg-white dark:bg-gray-900 overflow-hidden">
-        <div className="overflow-x-auto">
-        <Table>
+      <div className="rounded-xl border-2 shadow-sm bg-white dark:bg-gray-900 overflow-hidden" ref={tableRef}>
+        <div className="overflow-x-auto" tabIndex={0} onKeyDown={handleTableKeyDown} role="grid" aria-label="جدول العملاء">
           <TableHeader>
             <TableRow className="bg-muted/60 border-b-2">
-              <TableHead
-                className="cursor-pointer select-none font-bold text-sm"
-                onClick={() => handleSort("fullName")}
-              >
-                الاسم الكامل {sortBy === "fullName" && (sortOrder === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead className="font-bold text-sm">رقم القضية</TableHead>
-              <TableHead className="font-bold text-sm">الحالة</TableHead>
-              <TableHead className="font-bold text-sm">الهاتف</TableHead>
-              <TableHead
-                className="cursor-pointer select-none font-bold text-sm"
-                onClick={() => handleSort("updatedAt")}
-              >
-                آخر تحديث {sortBy === "updatedAt" && (sortOrder === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead className="w-[80px] font-bold text-sm">إجراءات</TableHead>
+              {visibleColumns.fullName && (
+                <TableHead
+                  className="cursor-pointer select-none font-bold text-sm"
+                  onClick={() => handleSort("fullName")}
+                >
+                  الاسم الكامل {sortBy === "fullName" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableHead>
+              )}
+              {visibleColumns.caseNumber && (
+                <TableHead className="font-bold text-sm">رقم القضية</TableHead>
+              )}
+              {visibleColumns.status && (
+                <TableHead className="font-bold text-sm">الحالة</TableHead>
+              )}
+              {visibleColumns.phone && (
+                <TableHead className="font-bold text-sm">الهاتف</TableHead>
+              )}
+              {visibleColumns.updatedAt && (
+                <TableHead
+                  className="cursor-pointer select-none font-bold text-sm"
+                  onClick={() => handleSort("updatedAt")}
+                >
+                  آخر تحديث {sortBy === "updatedAt" && (sortOrder === "asc" ? "↑" : "↓")}
+                </TableHead>
+              )}
+              {visibleColumns.actions && (
+                <TableHead className="w-[80px] font-bold text-sm">إجراءات</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-28" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-9 w-9 rounded-lg" /></TableCell>
+                  {visibleColumns.fullName && <TableCell><Skeleton className="h-5 w-32" /></TableCell>}
+                  {visibleColumns.caseNumber && <TableCell><Skeleton className="h-5 w-24" /></TableCell>}
+                  {visibleColumns.status && <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>}
+                  {visibleColumns.phone && <TableCell><Skeleton className="h-5 w-28" /></TableCell>}
+                  {visibleColumns.updatedAt && <TableCell><Skeleton className="h-5 w-20" /></TableCell>}
+                  {visibleColumns.actions && <TableCell><Skeleton className="h-9 w-9 rounded-lg" /></TableCell>}
                 </TableRow>
               ))
             ) : data?.clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <Search className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-base font-semibold text-muted-foreground">
-                      لم يتم العثور على عملاء
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      جرب تغيير معايير البحث
-                    </p>
+                <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="p-4 rounded-full bg-muted/50">
+                      <Search className="h-10 w-10 text-muted-foreground/60" />
+                    </div>
+                    <div>
+                      <p className="text-base font-bold text-muted-foreground">
+                        لم يتم العثور على عملاء
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {search || statusFilter !== "ALL" ? "جرب تغيير معايير البحث أو التصفية" : "لم يتم إضافة أي عميل بعد"}
+                      </p>
+                    </div>
+                    {!search && statusFilter === "ALL" && (
+                      <Link href="/clients/new">
+                        <Button variant="default" size="sm" className="font-bold text-xs">
+                          <PlusCircle className="h-4 w-4 ml-1" />
+                          إضافة عميل جديد
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
-              data?.clients.map((client) => (
-                <TableRow key={client.id} className="hover:bg-muted/40 border-b">
-                  <TableCell className="font-bold text-base">{client.fullName}</TableCell>
-                  <TableCell className="font-mono font-semibold text-sm bg-muted/30 rounded px-2 py-1 inline-block">{client.caseNumber}</TableCell>
-                  <TableCell>
-                    <Badge className={`${statusColors[client.status]} font-semibold text-xs px-3 py-1`} variant="secondary">
-                      {statusLabels[client.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-medium text-sm">{client.phone}</TableCell>
-                  <TableCell className="font-medium text-sm">
-                    {new Date(client.updatedAt).toLocaleDateString("ar-SA")}
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/clients/${client.id}`}>
-                      <Button variant="default" size="sm" className="h-8 px-3 font-bold text-xs">
-                        <Eye className="h-3.5 w-3.5 ml-1" />
-                        عرض
-                      </Button>
-                    </Link>
-                  </TableCell>
+              data?.clients.map((client, i) => (
+                <TableRow
+                  key={client.id}
+                  className={`hover:bg-muted/40 border-b transition-colors cursor-pointer ${selectedIndex === i ? "bg-primary/5 border-primary/30 shadow-sm" : ""}`}
+                  onClick={() => router.push(`/clients/${client.id}`)}
+                  onMouseEnter={() => setSelectedIndex(i)}
+                  aria-selected={selectedIndex === i}
+                >
+                  {visibleColumns.fullName && (
+                    <TableCell className="font-bold text-base">{client.fullName}</TableCell>
+                  )}
+                  {visibleColumns.caseNumber && (
+                    <TableCell className="font-mono font-semibold text-sm bg-muted/30 rounded px-2 py-1 inline-block">{client.caseNumber}</TableCell>
+                  )}
+                  {visibleColumns.status && (
+                    <TableCell>
+                      <Badge className={`${statusColors[client.status]} font-semibold text-xs px-3 py-1`} variant="secondary">
+                        {statusLabels[client.status]}
+                      </Badge>
+                    </TableCell>
+                  )}
+                  {visibleColumns.phone && (
+                    <TableCell className="font-medium text-sm">{client.phone}</TableCell>
+                  )}
+                  {visibleColumns.updatedAt && (
+                    <TableCell className="font-medium text-sm">
+                      {new Date(client.updatedAt).toLocaleDateString("ar-SA")}
+                    </TableCell>
+                  )}
+                  {visibleColumns.actions && (
+                    <TableCell>
+                      <Link href={`/clients/${client.id}`}>
+                        <Button variant="default" size="sm" className="h-8 px-3 font-bold text-xs">
+                          <Eye className="h-3.5 w-3.5 ml-1" />
+                          عرض
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
