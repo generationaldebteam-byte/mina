@@ -25,10 +25,10 @@ const statusSteps: ClientStatus[] = [
   ClientStatus.APPEAL,
 ];
 
-const terminalStatuses = [ClientStatus.APPROVED, ClientStatus.REJECTED, ClientStatus.CLOSED];
+const terminalStatuses: ClientStatus[] = [ClientStatus.APPROVED, ClientStatus.REJECTED, ClientStatus.CLOSED];
 
 export function ProgressStepper({ currentStatus }: { currentStatus: ClientStatus }) {
-  if (terminalStatuses.includes(currentStatus)) {
+  if (terminalStatuses.some((s) => s === currentStatus)) {
     return (
       <div className="flex gap-2">
         {terminalStatuses.map((s) => {
