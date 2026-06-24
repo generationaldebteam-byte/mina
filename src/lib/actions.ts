@@ -373,13 +373,15 @@ export async function uploadDocument(clientId: string, formData: FormData) {
       return { error: `فشل رفع الملف: ${uploadError.message}` };
     }
 
-    const { data: { signedUrl } } = await getSupabaseAdmin().storage
+    const { data } = await getSupabaseAdmin().storage
       .from("documents")
       .createSignedUrl(uniqueName, 60 * 60 * 24 * 365);
 
-    if (!signedUrl) {
+    if (!data?.signedUrl) {
       return { error: "فشل إنشاء رابط المستند" };
     }
+
+    const fileUrl = data.signedUrl;
 
     await prisma.document.create({
       data: {
