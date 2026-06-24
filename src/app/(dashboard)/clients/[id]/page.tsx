@@ -12,6 +12,7 @@ import { TimelineSection } from "@/components/timeline-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressStepper } from "@/components/progress-stepper";
 import { DuplicateClientButton } from "@/components/duplicate-client-button";
+import { Button } from "@/components/ui/button";
 import { Edit, FileText, ArrowLeft, Printer } from "lucide-react";
 import { initChecklist } from "@/lib/actions";
 
