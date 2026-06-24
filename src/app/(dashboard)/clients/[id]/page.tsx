@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { ClientInfoCard } from "@/components/client-info-card";
 import { StatusCard } from "@/components/status-card";
