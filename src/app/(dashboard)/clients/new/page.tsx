@@ -19,7 +19,7 @@ export default function NewClientPage() {
   const [loading, setLoading] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const draft = localStorage.getItem(DRAFT_KEY);
