@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Calendar, Clock } from "lucide-react";
+import { AlertTriangle, Calendar, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export async function DeadlinesWidget() {
@@ -23,7 +23,25 @@ export async function DeadlinesWidget() {
   const overdue = urgentTasks.filter((t) => new Date(t.dueDate) < now);
   const upcoming = urgentTasks.filter((t) => new Date(t.dueDate) >= now);
 
-  if (urgentTasks.length === 0) return null;
+  if (urgentTasks.length === 0) {
+    return (
+      <Card className="border-2 shadow-sm overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b-2 bg-muted/20 py-3">
+          <CardTitle className="flex items-center gap-2 text-base font-black">
+            <div className="p-1.5 rounded-lg bg-green-100 dark:bg-green-950/30">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </div>
+            المواعيد الهامة
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 text-center">
+          <CheckCircle className="h-8 w-8 mx-auto text-green-500/50 mb-2" />
+          <p className="text-sm font-bold text-muted-foreground">لا توجد مواعيد مستحقة هذا الأسبوع</p>
+          <p className="text-xs text-muted-foreground mt-1">كل القضايا في مسارها الصحيح</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   function timeLeft(date: Date) {
     const diff = date.getTime() - now.getTime();
