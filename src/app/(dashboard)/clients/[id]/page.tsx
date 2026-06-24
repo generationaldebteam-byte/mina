@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Edit, FileText, ArrowLeft, Printer } from "lucide-react";
 import { initChecklist } from "@/lib/actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function ClientDetailsPage({
   params,
 }: {
