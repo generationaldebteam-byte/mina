@@ -44,7 +44,7 @@ export function DuplicateClientButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button variant="outline" size="sm" className="font-bold text-xs h-8">
           <Copy className="h-3.5 w-3.5 ml-1" />
           نسخ القضية
