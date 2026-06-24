@@ -33,10 +33,16 @@ export function ProgressStepper({ currentStatus }: { currentStatus: ClientStatus
       <div className="flex gap-2">
         {terminalStatuses.map((s) => {
           const isActive = s === currentStatus;
-          const colors = {
+          const colors: Record<ClientStatus, string> = {
             [ClientStatus.APPROVED]: "border-green-500 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300",
             [ClientStatus.REJECTED]: "border-red-500 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300",
             [ClientStatus.CLOSED]: "border-slate-500 bg-slate-50 dark:bg-slate-950/30 text-slate-700 dark:text-slate-300",
+            [ClientStatus.NEW_CLIENT]: "",
+            [ClientStatus.GATHERING_DOCUMENTS]: "",
+            [ClientStatus.SUBMITTED]: "",
+            [ClientStatus.INTERVIEW_SCHEDULED]: "",
+            [ClientStatus.WAITING_DECISION]: "",
+            [ClientStatus.APPEAL]: "",
           };
           return (
             <div
