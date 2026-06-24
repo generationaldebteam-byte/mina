@@ -252,6 +252,7 @@ export function ClientTable() {
 
       <div className="rounded-xl border-2 shadow-sm bg-white dark:bg-gray-900 overflow-hidden" ref={tableRef}>
         <div className="overflow-x-auto" tabIndex={0} onKeyDown={handleTableKeyDown} role="grid" aria-label="جدول العملاء">
+          <Table>
           <TableHeader>
             <TableRow className="bg-muted/60 border-b-2">
               {visibleColumns.fullName && (
