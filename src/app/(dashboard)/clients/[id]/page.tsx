@@ -10,7 +10,8 @@ import { DocumentsSection } from "@/components/documents-section";
 import { TimelineSection } from "@/components/timeline-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressStepper } from "@/components/progress-stepper";
-import { Edit, FileText, ArrowLeft } from "lucide-react";
+import { DuplicateClientButton } from "@/components/duplicate-client-button";
+import { Edit, FileText, ArrowLeft, Printer } from "lucide-react";
 import { initChecklist } from "@/lib/actions";
 
 export default async function ClientDetailsPage({
@@ -61,6 +62,7 @@ export default async function ClientDetailsPage({
         name={client.fullName}
         caseNumber={client.caseNumber}
         status={client.status}
+        clientId={client.id}
       >
         <ProgressStepper currentStatus={client.status} />
       </StickyHeader>
@@ -160,11 +162,13 @@ function StickyHeader({
   name,
   caseNumber,
   status,
+  clientId,
   children,
 }: {
   name: string;
   caseNumber: string;
   status: string;
+  clientId: string;
   children: React.ReactNode;
 }) {
   return (
@@ -183,6 +187,15 @@ function StickyHeader({
             </div>
             <p className="text-muted-foreground font-mono text-xs md:text-sm">{caseNumber}</p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href={`/clients/${clientId}/print`}>
+            <Button variant="outline" size="sm" className="font-bold text-xs h-8">
+              <Printer className="h-3.5 w-3.5 ml-1" />
+              طباعة
+            </Button>
+          </Link>
+          <DuplicateClientButton clientId={clientId} clientName={name} caseNumber={caseNumber} />
         </div>
       </div>
       <div className="hidden md:block">

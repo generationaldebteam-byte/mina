@@ -251,3 +251,12 @@
 .animate-scale-in {
   animation: scale-in 0.2s ease-out;
 }
+
+@media print {
+  body * { visibility: hidden; }
+  .no-print { display: none !important; }
+  main, main * { visibility: visible; }
+  main { position: absolute; left: 0; top: 0; margin: 0 !important; padding: 0 !important; }
+  aside, nav, footer, header { display: none !important; }
+  @page { margin: 1cm; }
+}

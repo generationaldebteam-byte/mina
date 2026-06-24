@@ -7,6 +7,56 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { ClientStatus, TaskType, TaskPriority, TaskStatus, InteractionType } from "./prisma";
 
+const checklistTemplates: Record<string, { title: string; required: boolean }[]> = {
+  "لجوء": [
+    { title: "جواز السفر", required: true },
+    { title: "صور شخصية", required: true },
+    { title: "إثبات الهوية", required: true },
+    { title: "تقرير الدولة الأصل", required: true },
+    { title: "شهادات شهود", required: false },
+    { title: "تقرير طبي", required: false },
+    { title: "طلب اللجوء", required: true },
+    { title: "أدلة الاضطهاد", required: true },
+    { title: "ترجمة المستندات", required: false },
+  ],
+  "استئناف": [
+    { title: "قرار الرفض", required: true },
+    { title: "طلب الاستئناف", required: true },
+    { title: "مذكرة قانونية", required: true },
+    { title: "أدلة جديدة", required: false },
+    { title: "توكيل محامي", required: true },
+    { title: "ترجمة المستندات", required: false },
+  ],
+  "لم شمل": [
+    { title: "إثبات العلاقة الأسرية", required: true },
+    { title: "جوازات السفر", required: true },
+    { title: "شهادات ميلاد", required: true },
+    { title: "إثبات الإقامة", required: true },
+    { title: "طلب لم الشمل", required: true },
+    { title: "صور عائلية", required: false },
+  ],
+  "تأشيرة": [
+    { title: "جواز السفر", required: true },
+    { title: "طلب التأشيرة", required: true },
+    { title: "صور شخصية", required: true },
+    { title: "إثبات العمل", required: true },
+    { title: "كشف حساب بنكي", required: true },
+    { title: "حجز طيران", required: false },
+    { title: "تأمين صحي", required: true },
+    { title: "دعوة رسمية", required: false },
+  ],
+};
+
+const defaultChecklist = [
+  { title: "جواز السفر", required: true },
+  { title: "بطاقة الهوية", required: true },
+  { title: "إثبات السكن", required: true },
+  { title: "صور شخصية", required: true },
+  { title: "طلب التقديم", required: true },
+  { title: "أدلة داعمة", required: true },
+  { title: "المستندات المطلوبة", required: false },
+];
+
 const createClientSchema = z.object({
   fullName: z.string().min(1, "الاسم الكامل مطلوب"),
   phone: z.string().min(1, "الهاتف مطلوب"),
@@ -41,7 +91,7 @@ export async function createClient(formData: FormData) {
   }
 
   try {
-    await prisma.client.create({
+    const client = await prisma.client.create({
       data: {
         fullName: parsed.data.fullName,
         phone: parsed.data.phone,
@@ -55,11 +105,66 @@ export async function createClient(formData: FormData) {
       },
     });
 
+    const template = parsed.data.caseType ? checklistTemplates[parsed.data.caseType] : null;
+    const items = template || defaultChecklist;
+    for (const item of items) {
+      await prisma.clientChecklistItem.create({
+        data: { clientId: client.id, title: item.title, required: item.required },
+      });
+    }
+
     revalidatePath("/dashboard");
     return { success: true };
   } catch {
     return { error: "حدث خطأ أثناء إنشاء العميل" };
   }
+}
+
+export async function duplicateClient(clientId: string, newFullName: string, newCaseNumber: string) {
+  const session = await getSession();
+
+  const original = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!original) return { error: "العميل غير موجود" };
+
+  const client = await prisma.client.create({
+    data: {
+      fullName: newFullName,
+      phone: original.phone,
+      email: original.email,
+      nationality: original.nationality,
+      dateOfBirth: original.dateOfBirth,
+      passportNumber: original.passportNumber,
+      caseNumber: newCaseNumber,
+      caseType: original.caseType,
+      notes: original.notes,
+    },
+  });
+
+  const checklistItems = await prisma.clientChecklistItem.findMany({
+    where: { clientId },
+  });
+
+  if (checklistItems.length > 0) {
+    await prisma.clientChecklistItem.createMany({
+      data: checklistItems.map((item) => ({
+        clientId: client.id,
+        title: item.title,
+        completed: false,
+        required: item.required,
+      })),
+    });
+  }
+
+  await prisma.caseUpdate.create({
+    data: {
+      clientId: client.id,
+      note: `تم إنشاء هذه القضية كنسخة من ${original.caseNumber}`,
+      createdById: (session.user as any).id,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  return { success: true, clientId: client.id };
 }
 
 export async function updateClientStatus(clientId: string, status: ClientStatus) {
@@ -77,6 +182,28 @@ export async function updateClientStatus(clientId: string, status: ClientStatus)
       createdById: (session.user as any).id,
     },
   });
+
+  if (status === ClientStatus.REJECTED) {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 30);
+    const existingAppeal = await prisma.task.findFirst({
+      where: { clientId, type: TaskType.APPEAL, status: TaskStatus.PENDING },
+    });
+    if (!existingAppeal) {
+      await prisma.task.create({
+        data: {
+          clientId,
+          title: "تقديم استئناف - مدة 30 يوماً",
+          description: "تم رفض القضية. يجب تقديم استئناف خلال 30 يوماً من تاريخ الرفض.",
+          dueDate,
+          type: TaskType.APPEAL,
+          priority: TaskPriority.URGENT,
+          status: TaskStatus.PENDING,
+          createdById: (session.user as any).id,
+        },
+      });
+    }
+  }
 
   revalidatePath(`/clients/${clientId}`);
   return { success: true };
@@ -287,19 +414,15 @@ export async function initChecklist(clientId: string) {
   const existing = await prisma.clientChecklistItem.count({ where: { clientId } });
   if (existing > 0) return { success: true };
 
-  const defaults = [
-    { title: "Passport", required: true },
-    { title: "ID Card", required: true },
-    { title: "Proof of Residence", required: true },
-    { title: "Tax Number", required: false },
-    { title: "Photos", required: true },
-    { title: "Application Form", required: true },
-    { title: "Interview Letter", required: false },
-    { title: "Residence Permit", required: false },
-    { title: "Supporting Evidence", required: true },
-  ];
+  const client = await prisma.client.findUnique({
+    where: { id: clientId },
+    select: { caseType: true },
+  });
 
-  for (const item of defaults) {
+  const template = client?.caseType ? checklistTemplates[client.caseType] : null;
+  const items = template || defaultChecklist;
+
+  for (const item of items) {
     await prisma.clientChecklistItem.create({ data: { clientId, title: item.title, required: item.required } });
   }
 

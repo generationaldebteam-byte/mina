@@ -6,6 +6,7 @@ import { ClientTable } from "@/components/client-table";
 import { UrgentCasesWidget } from "@/components/urgent-cases-widget";
 import { RecentClientsWidget } from "@/components/recent-clients-widget";
 import { CasesByStatusWidget } from "@/components/status-summary-widget";
+import { DeadlinesWidget } from "@/components/deadlines-widget";
 import { ClientStatus } from "@/lib/prisma";
 
 async function getStats() {
@@ -39,7 +40,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <UrgentCasesWidget />
+          <DeadlinesWidget />
         </div>
         <CasesByStatusWidget />
       </div>
