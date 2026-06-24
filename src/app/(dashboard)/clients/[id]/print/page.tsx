@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { FileText, Printer } from "lucide-react";
 import Link from "next/link";
+import { PrintButton } from "@/components/print-button";
 import { Button } from "@/components/ui/button";
 
 const statusLabels: Record<string, string> = {
@@ -40,10 +40,7 @@ export default async function PrintClientPage({
         <Link href={`/clients/${client.id}`}>
           <Button variant="outline" size="sm" className="font-bold text-xs">← العودة</Button>
         </Link>
-        <Button onClick={() => window.print()} size="sm" className="font-bold text-xs">
-          <Printer className="h-4 w-4 ml-1" />
-          طباعة / حفظ PDF
-        </Button>
+        <PrintButton />
       </div>
 
       <div className="border-b-3 border-foreground pb-4 mb-6 print:border-b-2">
