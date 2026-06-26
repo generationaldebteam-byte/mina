@@ -20,11 +20,16 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "إدارة القضايا",
   },
   icons: {
-    apple: "/icon-192.svg",
+    apple: "/icon-192.png",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "theme-color": "#1a237e",
   },
 };
 
