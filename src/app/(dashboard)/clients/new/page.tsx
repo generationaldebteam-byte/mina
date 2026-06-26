@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/actions";
 import { ArrowRight, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { IdScanner } from "@/components/id-scanner";
+import type { ExtractedData } from "@/components/id-scanner";
 
 const DRAFT_KEY = "new-client-draft";
 
@@ -62,6 +64,33 @@ export default function NewClientPage() {
     toast.success("تم حذف المسودة");
   }
 
+  function handleExtracted(data: ExtractedData) {
+    const form = formRef.current;
+    if (!form) return;
+
+    const set = (name: string, value?: string) => {
+      if (!value) return;
+      const el = form.elements.namedItem(name) as HTMLInputElement | null;
+      if (el) { el.value = value; el.dispatchEvent(new Event("input", { bubbles: true })); }
+    };
+
+    set("fullName", data.fullName);
+    set("phone", data.phone);
+    set("caseNumber", data.caseNumber);
+    set("email", data.email);
+    set("nationality", data.nationality);
+    set("dateOfBirth", data.dateOfBirth);
+    set("passportNumber", data.passportNumber);
+    set("caseType", data.caseType);
+
+    const filled = Object.values(data).filter(Boolean).length;
+    if (filled > 0) {
+      toast.success(`تم استخراج ${filled} حقل من البطاقة`);
+    } else {
+      toast.error("لم نتمكن من استخراج بيانات، يمكنك إدخالها يدوياً");
+    }
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -95,6 +124,7 @@ export default function NewClientPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <IdScanner onExtracted={handleExtracted} disabled={loading} />
           {draftSaved && (
             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
               <Save className="h-3 w-3" />
