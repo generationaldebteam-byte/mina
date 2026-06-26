@@ -49,7 +49,7 @@ export function Sidebar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-3 left-3 z-50 flex md:hidden h-10 w-10 items-center justify-center rounded-xl border-2 bg-background shadow-md hover:bg-muted active:scale-95 transition-all"
+        className="fixed top-3 right-3 z-50 flex md:hidden h-10 w-10 items-center justify-center rounded-xl border-2 bg-background shadow-md hover:bg-muted active:scale-95 transition-all"
         aria-label="فتح القائمة"
       >
         <Menu className="h-5 w-5" />

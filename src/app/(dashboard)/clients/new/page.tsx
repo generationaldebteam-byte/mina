@@ -173,11 +173,11 @@ export default function NewClientPage() {
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
-              <Link href="/dashboard">
-                <Button type="button" variant="outline" className="font-bold">إلغاء</Button>
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+              <Link href="/dashboard" className="w-full sm:w-auto">
+                <Button type="button" variant="outline" className="font-bold w-full sm:w-auto">إلغاء</Button>
               </Link>
-              <Button type="submit" disabled={loading} className="font-bold">
+              <Button type="submit" disabled={loading} className="font-bold w-full sm:w-auto">
                 {loading ? "جاري الإضافة..." : "إضافة عميل"}
               </Button>
             </div>
