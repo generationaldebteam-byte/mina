@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Clock, Hourglass, CheckCircle } from "lucide-react";
 import { ClientTable } from "@/components/client-table";
@@ -39,19 +40,23 @@ export default async function DashboardPage() {
         <StatCard title="القضايا المغلقة" value={stats.closed} icon={CheckCircle} description="تم حلها أو إغلاقها" color="green" href="/clients?status=closed" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <DeadlinesWidget />
+      <Suspense fallback={<WidgetFallback lines={3} />}>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <DeadlinesWidget />
+          </div>
+          <CasesByStatusWidget />
         </div>
-        <CasesByStatusWidget />
-      </div>
+      </Suspense>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <ClientTable />
+      <Suspense fallback={<WidgetFallback lines={5} />}>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <ClientTable />
+          </div>
+          <RecentClientsWidget />
         </div>
-        <RecentClientsWidget />
-      </div>
+      </Suspense>
     </div>
   );
 }
@@ -100,5 +105,31 @@ function StatCard({
         </CardContent>
       </Card>
     </Link>
+  );
+}
+
+function WidgetFallback({ lines }: { lines: number }) {
+  return (
+    <div className="animate-pulse grid gap-6 lg:grid-cols-3">
+      <div className="lg:col-span-2">
+        <div className="rounded-xl border-2 p-4 space-y-3">
+          {[...Array(lines)].map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="h-5 w-5 rounded-full bg-muted" />
+              <div className="flex-1 h-4 bg-muted rounded" />
+              <div className="h-4 w-16 bg-muted rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-xl border-2 p-4 space-y-3">
+        {[...Array(lines)].map((_, i) => (
+          <div key={i} className="flex items-center justify-between">
+            <div className="h-4 w-20 bg-muted rounded" />
+            <div className="h-4 w-8 bg-muted rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
