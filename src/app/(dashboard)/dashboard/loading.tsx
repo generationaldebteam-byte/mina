@@ -21,7 +21,7 @@ export default function DashboardLoading() {
           </Card>
         ))}
       </div>
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="border-2">
             <CardHeader className="border-b-2"><div className="h-5 w-32 bg-muted rounded" /></CardHeader>

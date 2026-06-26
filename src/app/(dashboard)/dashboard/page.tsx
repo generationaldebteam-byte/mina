@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       </div>
 
       <Suspense fallback={<WidgetFallback lines={3} />}>
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <DeadlinesWidget />
           </div>
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       </Suspense>
 
       <Suspense fallback={<WidgetFallback lines={5} />}>
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <ClientTable />
           </div>
@@ -110,7 +110,7 @@ function StatCard({
 
 function WidgetFallback({ lines }: { lines: number }) {
   return (
-    <div className="animate-pulse grid gap-6 lg:grid-cols-3">
+    <div className="animate-pulse grid gap-3 md:gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2">
         <div className="rounded-xl border-2 p-4 space-y-3">
           {[...Array(lines)].map((_, i) => (
