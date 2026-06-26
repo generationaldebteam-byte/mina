@@ -17,6 +17,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "نظام إدارة القضايا",
   description: "نظام إدارة قضايا اللجوء والقانونية",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "إدارة القضايا",
+  },
+  icons: {
+    apple: "/icon-192.svg",
+  },
 };
 
 export default function RootLayout({
