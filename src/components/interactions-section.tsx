@@ -118,18 +118,18 @@ export function InteractionsSection({ clientId, interactions }: { clientId: stri
               ))}
             </SelectContent>
           </Select>
-          <div className="flex flex-col-reverse sm:flex-row gap-2">
-            <Textarea
-              placeholder="سجّل تفاعلاً..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="min-h-[60px] flex-1"
-              rows={2}
-            />
+          <div className="flex flex-col sm:flex-row-reverse gap-2">
             <Button type="submit" disabled={loading || !note.trim()} className="w-full sm:w-auto sm:self-end shrink-0">
               <PlusCircle className="h-4 w-4 ml-1" />
               تسجيل
             </Button>
+            <Textarea
+              placeholder="سجّل تفاعلاً..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="min-h-[60px] flex-1 max-h-[40vh] overflow-y-auto"
+              rows={2}
+            />
           </div>
           <div className="flex flex-wrap gap-1">
             {quickActions.map((qa) => (

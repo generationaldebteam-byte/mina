@@ -59,18 +59,18 @@ export function TimelineSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
-        <form onSubmit={handleSubmit} className="flex flex-col-reverse sm:flex-row gap-2 p-3 rounded-xl border-2 bg-muted/20">
-          <Textarea
-            placeholder="أضف ملاحظة..."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="min-h-[60px] border-2 font-medium flex-1"
-            rows={2}
-          />
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row-reverse gap-2 p-3 rounded-xl border-2 bg-muted/20">
           <Button type="submit" disabled={loading || !note.trim()} className="w-full sm:w-auto sm:self-end shrink-0 font-bold">
             <PlusCircle className="h-4 w-4 ml-1" />
             {loading ? "جاري الإضافة..." : "إضافة"}
           </Button>
+          <Textarea
+            placeholder="أضف ملاحظة..."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="min-h-[60px] border-2 font-medium flex-1 max-h-[40vh] overflow-y-auto"
+            rows={2}
+          />
         </form>
 
         <div className="space-y-4">
