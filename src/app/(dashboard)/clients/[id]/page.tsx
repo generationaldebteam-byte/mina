@@ -15,6 +15,7 @@ import { DuplicateClientButton } from "@/components/duplicate-client-button";
 import { Button } from "@/components/ui/button";
 import { Edit, FileText, ArrowLeft, Printer } from "lucide-react";
 import { initChecklist } from "@/lib/actions";
+import { WhatsAppSendDialog } from "@/components/whatsapp-send-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,7 @@ export default async function ClientDetailsPage({
         caseNumber={client.caseNumber}
         status={client.status}
         clientId={client.id}
+        phone={client.phone}
       >
         <ProgressStepper currentStatus={client.status} />
       </StickyHeader>
@@ -179,12 +181,14 @@ function StickyHeader({
   caseNumber,
   status,
   clientId,
+  phone,
   children,
 }: {
   name: string;
   caseNumber: string;
   status: string;
   clientId: string;
+  phone: string;
   children: React.ReactNode;
 }) {
   return (
@@ -213,6 +217,7 @@ function StickyHeader({
               <span className="hidden sm:inline">طباعة</span>
             </Button>
           </Link>
+          <WhatsAppSendDialog clientId={clientId} clientName={name} phone={phone} />
           <DuplicateClientButton clientId={clientId} clientName={name} caseNumber={caseNumber} />
         </div>
       </div>
