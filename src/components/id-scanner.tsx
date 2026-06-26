@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScanLine, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export interface ExtractedData {
   fullName?: string;
@@ -51,6 +52,8 @@ export function IdScanner({ onExtracted, disabled }: Props) {
 
       onExtracted(json.data);
     } catch (err) {
+      const message = err instanceof Error ? err.message : "فشل المسح";
+      toast.error(message);
       onExtracted({});
     } finally {
       setScanning(false);
