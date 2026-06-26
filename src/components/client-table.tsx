@@ -336,7 +336,7 @@ export function ClientTable() {
                     <TableCell className="font-bold text-base">{client.fullName}</TableCell>
                   )}
                   {visibleColumns.caseNumber && (
-                    <TableCell className="font-mono font-semibold text-sm bg-muted/30 rounded px-2 py-1 inline-block">{client.caseNumber}</TableCell>
+                    <TableCell className="font-mono font-semibold text-sm">{client.caseNumber}</TableCell>
                   )}
                   {visibleColumns.status && (
                     <TableCell>
