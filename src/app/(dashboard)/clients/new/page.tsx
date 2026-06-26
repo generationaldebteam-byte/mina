@@ -64,9 +64,12 @@ export default function NewClientPage() {
     toast.success("تم حذف المسودة");
   }
 
-  function handleExtracted(data: ExtractedData) {
+  function handleExtracted(data: ExtractedData | undefined) {
     const form = formRef.current;
-    if (!form) return;
+    if (!form || !data) {
+      toast.error("فشل الاتصال بخدمة المسح، تأكد من ضبط مفتاح Gemini API");
+      return;
+    }
 
     const set = (name: string, value?: string) => {
       if (!value) return;

@@ -27,3 +27,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - DATABASE_URL, DIRECT_URL (PostgreSQL + pooled via Supabase)
 - NEXTAUTH_SECRET
 - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+- GEMINI_API_KEY (لخاصية مسح البطاقة بالذكاء الاصطناعي)
