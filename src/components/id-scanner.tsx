@@ -28,21 +28,21 @@ export function IdScanner({ onExtracted, disabled }: Props) {
   async function handleFile(file: File) {
     if (!file) return;
 
-    const { createWorker } = await import("tesseract.js");
-    const worker = await createWorker("ara+eng", 1);
-
     setScanning(true);
     setProgress(0);
 
-    worker.setLogger((m) => {
-      if (m.status === "recognizing text") {
-        setProgress(Math.round(m.progress * 100));
-      }
+    const { createWorker } = await import("tesseract.js");
+    const worker = await createWorker("ara+eng", 1, {
+      logger: (m) => {
+        if (m.status === "recognizing text") {
+          setProgress(Math.round(m.progress * 100));
+        }
+      },
     });
 
     try {
-      const { data } = await worker.recognize(file);
-      const text = data.text;
+      const result = await worker.recognize(file);
+      const text = result.data.text;
       const fields = parseText(text);
 
       onExtracted(fields);
