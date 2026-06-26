@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-muted/30">
       <QuickSearch />
       <Sidebar />
-      <main className="md:mr-64 min-h-screen pb-16 md:pb-0">
+      <main className="md:mr-64 min-h-screen pb-16 md:pb-0 overflow-x-hidden">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 shadow-sm">
           <div className="flex items-center gap-4">
             <div>
@@ -25,7 +25,7 @@ export default async function DashboardLayout({
           </div>
           <SearchButton />
         </header>
-        <div className="px-3 md:px-8 py-4 md:py-6 animate-fade-in">
+        <div className="px-3 md:px-8 py-4 md:py-6">
           {children}
         </div>
       </main>

@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   const stats = await getStats();
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6 overflow-x-hidden">
       <div>
         <h2 className="text-xl md:text-2xl font-black">لوحة التحكم</h2>
         <p className="text-sm text-muted-foreground mt-1">نظرة عامة على جميع القضايا</p>
@@ -40,17 +40,21 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <DeadlinesWidget />
         </div>
-        <CasesByStatusWidget />
+        <div className="min-w-0">
+          <CasesByStatusWidget />
+        </div>
       </div>
 
       <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <ClientTable />
         </div>
-        <RecentClientsWidget />
+        <div className="min-w-0">
+          <RecentClientsWidget />
+        </div>
       </div>
     </div>
   );
