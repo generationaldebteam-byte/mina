@@ -118,7 +118,7 @@ export function InteractionsSection({ clientId, interactions }: { clientId: stri
               ))}
             </SelectContent>
           </Select>
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-2">
             <Textarea
               placeholder="سجّل تفاعلاً..."
               value={note}
@@ -126,7 +126,7 @@ export function InteractionsSection({ clientId, interactions }: { clientId: stri
               className="min-h-[60px] flex-1"
               rows={2}
             />
-            <Button type="submit" disabled={loading || !note.trim()} className="self-end shrink-0">
+            <Button type="submit" disabled={loading || !note.trim()} className="w-full sm:w-auto sm:self-end shrink-0">
               <PlusCircle className="h-4 w-4 ml-1" />
               تسجيل
             </Button>

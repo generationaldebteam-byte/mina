@@ -59,7 +59,7 @@ export function TimelineSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 p-3 rounded-xl border-2 bg-muted/20">
+        <form onSubmit={handleSubmit} className="flex flex-col-reverse sm:flex-row gap-2 p-3 rounded-xl border-2 bg-muted/20">
           <Textarea
             placeholder="أضف ملاحظة..."
             value={note}
