@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Loader2, ScanLine } from "lucide-react";
 
-interface ExtractedData {
+export interface ExtractedData {
   fullName?: string;
   phone?: string;
   caseNumber?: string;
