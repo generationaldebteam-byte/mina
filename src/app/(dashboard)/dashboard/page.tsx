@@ -11,14 +11,16 @@ import { ClientStatus } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 async function getStats() {
-  const total = await prisma.client.count();
-  const active = await prisma.client.count({
-    where: { status: { notIn: [ClientStatus.APPROVED, ClientStatus.REJECTED, ClientStatus.CLOSED] } },
-  });
-  const waiting = await prisma.client.count({ where: { status: ClientStatus.WAITING_DECISION } });
-  const closed = await prisma.client.count({
-    where: { status: { in: [ClientStatus.APPROVED, ClientStatus.REJECTED, ClientStatus.CLOSED] } },
-  });
+  const [total, active, waiting, closed] = await Promise.all([
+    prisma.client.count(),
+    prisma.client.count({
+      where: { status: { notIn: [ClientStatus.APPROVED, ClientStatus.REJECTED, ClientStatus.CLOSED] } },
+    }),
+    prisma.client.count({ where: { status: ClientStatus.WAITING_DECISION } }),
+    prisma.client.count({
+      where: { status: { in: [ClientStatus.APPROVED, ClientStatus.REJECTED, ClientStatus.CLOSED] } },
+    }),
+  ]);
 
   return { total, active, waiting, closed };
 }
